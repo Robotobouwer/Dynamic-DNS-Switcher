@@ -1,56 +1,53 @@
 #!/bin/bash
 
-local PRIMRAY_DNS=$1
-local SECONDARY_DNS=$2
+PRIMRAY_DNS=$1
+SECONDARY_DNS=$2
+
+FILEPATH="/etc/bind/named.conf.options"
 
 main() {
 
-    setup
-
-    echo "Running DNS Switcher:" 
-    while (true); do
-       
-        primaryDnsIsReachable
-        
-        while (${DNS_IS_REACHABLE} -eq 0)
-        do
-            primaryDnsIsReachable
-            sleep 5
-        done
-
-    done
+    setup   
+    restartBIND9
+    updateDNS
 
 }
-
 
 setup() {
 
     echo "checking if bind9 is installed"
 
-   local PACKAGES=$(dpkg -l | grep "bind9")
+    PACKAGES=$(dpkg -s | grep -w "Package: bind9$")
 
     if [ $? -ne 0 ]; then
         echo "installing bind9"
         apt install bind9 -y
+
+        # initial file setup
+
+        sed -i "s@// forwarders {@  forwarders {@g" ${FILEPATH}
+        sed -i "s@// 	0.0.0.0;@        ${PRIMRAY_DNS};@g" ${FILEPATH}
+        sed -i "s@// };@  };\n          forward only;@g" ${FILEPATH}
     else
-        echo "Success!"    
+        echo "Success!"
     fi
 
-   local FILEPATH="/etc/bind/named.conf.options"
+    
     echo "checking if config File is set"
+
     if [ ! -e ${FILEPATH} ]; then
         echo "${FILEPATH} does not exist"
         exit 1
     else
-        echo "Success!" 
+        echo "Success!"
     fi
 
-    # initial file setup
+    CURRENT_DNS=$PRIMRAY_DNS
 
-    sed -i "s@// forwarders {@  forwarders {@g" ${FILEPATH}
-    sed -i "s@// 	0.0.0.0;@        ${PRIMRAY_DNS};@g" ${FILEPATH}
-    sed -i "s@// };@  };\n          forward only;@g" ${FILEPATH}
+}
 
+restartBIND9() {
+    echo "restart"
     named-checkconf "/etc/bind/named.conf"
 
     if [ $? -ne 0 ]; then
@@ -63,27 +60,41 @@ setup() {
         echo "config not valid"
     fi
 
-
-    echo "Starting bind9 service" 
+    echo "Starting bind9 service"
     service bind9 restart
 
 }
 
-primaryDnsIsReachable(){
+changeDNS() {
 
-    local DNS_IS_REACHABLE
+    local NEW_DNS=$1
+    echo "changedns $NEW_DNS"
 
-    ping -c5 ${PRIMRAY_DNS}
+    sed -i "s@        ${CURRENT_DNS};@        ${NEW_DNS};@g" ${FILEPATH}
+    restartBIND9
+}
 
-    if [$? -eq 0];then
-        DNS_IS_REACHABLE=1
+updateDNS() {
+
+    echo "CURRENT_DNS: $CURRENT_DNS"
+
+    ping -c 1 ${PRIMRAY_DNS}
+    DNS_IS_REACHABLE=$?
+
+    echo "DNS_IS_REACHABLE: $DNS_IS_REACHABLE"
+    echo "CURRENT_DNS: $CURRENT_DNS"
+
+    if [[ $DNS_IS_REACHABLE -ne 0 ]] && [[ $CURRENT_DNS == "$PRIMRAY_DNS" ]]; then
+        echo "Changing DNS..."
+        changeDNS $SECONDARY_DNS
+
+    elif [[ $DNS_IS_REACHABLE -eq 0 ]] && [[ $CURRENT_DNS == "$SECONDARY_DNS" ]]; then
+        echo "Changing Back to PRimary DNS"
+        changeDNS $PRIMRAY_DNS
     else
+        echo "NOT Changing DNS..."
         DNS_IS_REACHABLE=0
     fi
-
-    
-
 }
 
 main
-
