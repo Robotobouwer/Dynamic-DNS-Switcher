@@ -7,10 +7,10 @@ FILEPATH="/etc/bind/named.conf.options"
 
 main() {
 
-    setup   
+    setup
     restartBIND9
     updateDNS
-
+    echo "Done"
 }
 
 setup() {
@@ -32,7 +32,6 @@ setup() {
         echo "Success!"
     fi
 
-    
     echo "checking if config File is set"
 
     if [ ! -e ${FILEPATH} ]; then
@@ -42,7 +41,8 @@ setup() {
         echo "Success!"
     fi
 
-    CURRENT_DNS=$PRIMRAY_DNS
+    CURRENT_DNS=$(sed '14!d' /etc/bind/named.conf.options | sed 's/;//g' | sed 's/[[:space:]]//g')
+    echo "CURRENT_DNS: $CURRENT_DNS"
 
 }
 
@@ -62,6 +62,7 @@ restartBIND9() {
 
     echo "Starting bind9 service"
     service bind9 restart
+    echo "Restart Successful"
 
 }
 
@@ -76,6 +77,9 @@ changeDNS() {
 
 updateDNS() {
 
+
+    echo "PRIMRY_DNS: $PRIMRAY_DNS"
+    echo "SECONDARY_DNS: $SECONDARY_DNS"
     echo "CURRENT_DNS: $CURRENT_DNS"
 
     ping -c 1 ${PRIMRAY_DNS}
@@ -91,9 +95,11 @@ updateDNS() {
     elif [[ $DNS_IS_REACHABLE -eq 0 ]] && [[ $CURRENT_DNS == "$SECONDARY_DNS" ]]; then
         echo "Changing Back to PRimary DNS"
         changeDNS $PRIMRAY_DNS
+    elif [[ $CURRENT_DNS != "$PRIMRAY_DNS" ]] && [[ $CURRENT_DNS != "$SECONDARY_DNS" ]]; then
+        echo "DNS is NEITHER Primray or Secondary... changing to Primary"
+        changeDNS $PRIMRAY_DNS
     else
         echo "NOT Changing DNS..."
-        DNS_IS_REACHABLE=0
     fi
 }
 

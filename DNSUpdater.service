@@ -1,0 +1,11 @@
+[Unit]
+Description=Dynamic DNS Switcher using Bind9
+Wants=DNSUpdater.timer
+
+[Service]
+Type=forking
+ExecStart=/opt/updatescript.sh DNS_1 DNS_2
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
