@@ -12,6 +12,8 @@ The according check is run every 30 seconds.
 4. Run the command: **systemctl daemon-reload**
 5. Run the command: **systemctl start DNSUpdater.service**
 6. Run the command: **systemctl enable DNSUpdater.service** -> This starts the Service upon system restart
+7. Set your Routers DNS Server to the Machine that runs the UpdaterService
+
 
 ### Enjoy!
 
