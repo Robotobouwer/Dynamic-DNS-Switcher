@@ -6,7 +6,7 @@ SECONDARY_DNS=$2
 FILEPATH="/etc/bind/named.conf.options"
 
 main() {
-
+    echo "start"
     setup
     restartBIND9
     updateDNS
