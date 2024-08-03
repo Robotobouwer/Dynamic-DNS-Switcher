@@ -9,11 +9,9 @@ The according check is run every 30 seconds.
 1. Login to your Server 
 2. Run the following Command: 
 
-<code>
+```
 curl https://raw.githubusercontent.com/Robotobouwer/Dynamic-DNS-Switcher/main/setupscript.sh | sudo /bin/bash -s *DNS1* *DNS2*
  
-</code>
-
-
+```
 ### Enjoy!
 
