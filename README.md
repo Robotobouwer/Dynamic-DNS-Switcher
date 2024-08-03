@@ -1,4 +1,4 @@
-# DNS_Switcher
+# Dynamic DNS Switcher
 
 This is a Systemd managed Service to switch between two predefined DNS Severs, depending on which is available at the time.
 The according check is run every 30 seconds.
