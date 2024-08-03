@@ -6,9 +6,13 @@ The according check is run every 30 seconds.
 ## Setup
 #### You should run the following steps as sudo: 
 
-1. Copy the script "setupscript.sh" to your Server
-2. Run the script as follows: updatescript *DNS1* *DNS2*
+1. Login to your Server 
+2. Run the following Command: 
 
+<code>
+curl https://raw.githubusercontent.com/Robotobouwer/Dynamic-DNS-Switcher/main/setupscript.sh | sudo /bin/bash -s *DNS1* *DNS2*
+ 
+</code>
 
 
 ### Enjoy!
