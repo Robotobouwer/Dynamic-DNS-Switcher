@@ -16,7 +16,7 @@ echo "Replacing DNS Servers"
 sed -i "s@DNS_1@${DNS1}@g" DNSUpdater.service
 sed -i "s@DNS_2@${DNS2}@g" DNSUpdater.service
 
-cat DNSUpdater.service
+mv updatescript.sh /opt/
 
 echo "moving SystemdService"
 
