@@ -27,7 +27,7 @@ setup() {
 
         sed -i "s@// forwarders {@  forwarders {@g" ${FILEPATH}
         sed -i "s@// 	0.0.0.0;@        ${PRIMRAY_DNS};@g" ${FILEPATH}
-        sed -i "s@// };@  };\n          forward only;@g" ${FILEPATH}
+        sed -i "s@// };@  };\n          forward only;\n          allow-query { any; };\n          recursion yes;@g" ${FILEPATH}
     else
         echo "Success!"
     fi
